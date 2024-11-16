@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+  background: rgb(204,204,204); 
+}
+.page {
+  background: white;
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 0.5cm;
+  box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+}
+.page[size="A4"] {  
+  width: 	215.9mm;
+  height: 279.4mm; 
+}
+.page[size="A4"][layout="landscape"] {
+  width: 	215.9mm;
+  height: 279.4mm;  
+}
+.page[size="A3"] {
+  width: 29.7cm;
+  height: 42cm;
+}
+.page[size="A3"][layout="landscape"] {
+  width: 42cm;
+  height: 29.7cm;  
+}
+.page[size="A5"] {
+  width: 14.8cm;
+  height: 21cm;
+}
+.page[size="A5"][layout="landscape"] {
+  width: 21cm;
+  height: 14.8cm;  
+}
+@media print {
+  body, page {
+    margin: 0;
+    box-shadow: 0;
+  }
+}
+
+
+
+    </style>
+</head>
+<body>
+    <section>
+        <button title="Previous Page" id="previous"> ਪਿਛਲਾ ਪੰਨਾ </button>
+        <button title="Next Page" id="next"> ਅਗਲਾ ਪੰਨਾ </button>
+        <span id="pagecount"></span>
+        <hr/>
+        <canvas class="page" size="A4" layout="landscape"></canvas>
+        </section>
+        
+        
+        <script>
+            // Disable right-click context menu
+            window.addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+            });
+        
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (view source), Ctrl+S (save page)
+            window.addEventListener('keydown', function(event) {
+                // Key codes for various keys
+                const key = event.key || event.keyCode;
+                const isCtrl = event.ctrlKey || event.metaKey;
+                const isShift = event.shiftKey;
+                
+                if (
+                    (key === 'F12' || key === 123) ||                             // F12
+                    (isCtrl && key === 'I') ||                                    // Ctrl + I
+                    (isCtrl && isShift && (key === 'C' || key === 'J')) ||        // Ctrl + Shift + C/J
+                    (isCtrl && key === 'U') ||                                    // Ctrl + U
+                    (isCtrl && key === 'S') ||                                    // Ctrl + S
+                    (isCtrl && key === 'P')                                       // Ctrl + P
+                ) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+            }, true);
+        
+            // Disable mouse and keyboard events
+            const disableAllEvents = (event) => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return false;
+            };
+        
+            // Block keyboard and mouse events
+            ['keydown', 'keypress', 'mousedown', 'mouseup', 'dblclick', 'mousemove'].forEach(eventType => {
+                window.addEventListener(eventType, disableAllEvents, true);
+            });
+        
+            // Disable Copy, Paste, Cut
+            document.addEventListener('copy', (e) => e.preventDefault());
+            document.addEventListener('paste', (e) => e.preventDefault());
+            document.addEventListener('cut', (e) => e.preventDefault());
+        
+        
+            setInterval(()=>{if(document.hasFocus()){document.querySelector("section").style.display = "block"}
+                        else {document.querySelector("section").style.display = "none"}
+                        })
+          window.addEventListener("keyup", function(e) {
+          if (e.keyCode == 44) {
+            document.body.style.display = "none";
+            setTimeout(()=>document.body.style.display = "block",2000);
+          }});
+       
+        </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.8.349/pdf.min.js"></script>
+        <script>
+            let pbtn = document.querySelector("#previous");
+            let nbtn = document.querySelector("#next");
+            let pagecount = document.querySelector("#pagecount");
+
+	async function run(){
+        let array = ('<%-buf%>').split(",");
+        let numarr = array.map((n)=>Number(n));
+
+		var typeArray = new Uint8Array(numarr);
+
+		console.log(typeArray)
+		const pdf = await PDFJS.getDocument(typeArray)
+
+
+		// you can now use *pdf* here pdf.numPages
+		async function next(pg){
+		const page = await pdf.getPage(pg)
+		// you can now use *page* here
+		var viewport = page.getViewport(2.0);
+		var canvas = document.querySelector("canvas")
+		canvas.height = viewport.height+50;
+		canvas.width = viewport.width;
+		page.render({
+			canvasContext: canvas.getContext('2d'),
+			viewport: viewport
+		});
+		}
+		let pg = 1;
+		window.addEventListener("keyup", function(e) {
+          if(e.keyCode == 39){nbtn.click()}
+          if(e.keyCode == 37){pbtn.click()}
+        });
+		nbtn.onclick = ()=>{
+            pg++;
+            if(pg<1)pg=1;
+            else if(pg>pdf.numPages) pg = pdf.numPages;
+            padeupdate();
+            next(pg);}
+		pbtn.onclick = ()=>{
+            pg--;
+            if(pg<1)pg=1;
+            else if(pg>pdf.numPages) pg = pdf.numPages;
+            padeupdate();
+            next(pg)};
+		next(pg);
+       pagecount.innerHTML = `${pg}/${pdf.numPages}`
+        let padeupdate = ()=>{pagecount.innerHTML = `${pg}/${pdf.numPages}`}
+	};
+    run();
+        </script>
+</body>
+</html>
