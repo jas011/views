@@ -61,6 +61,7 @@
         
         
         <script>
+          
             // Disable right-click context menu
             window.addEventListener('contextmenu', function(event) {
                 event.preventDefault();
@@ -117,6 +118,10 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.8.349/pdf.min.js"></script>
         <script>
+              window.onload = () => {
+                console.log(screen.width, screen.height)
+                if (screen.width<920){document.write("Error: you are using a mobile device<br> we only supports PC's")}
+            }
             let pbtn = document.querySelector("#previous");
             let nbtn = document.querySelector("#next");
             let pagecount = document.querySelector("#pagecount");
