@@ -85,6 +85,10 @@
                     event.preventDefault();
                     event.stopImmediatePropagation();
                 }
+                if(event.metaKey){
+                  document.body.style.display = "none";
+            setTimeout(()=>document.body.style.display = "block",2000);
+                }
             }, true);
         
             // Disable mouse and keyboard events
